@@ -20,7 +20,7 @@ justified in writing.
 ## Why this project exists
 
 A previous project used **Prowler** and **GuardDuty** to find misconfigurations
-in a *running* AWS account — detective control. The over-permissioned IAM role it
+in a *running* AWS account  detective control. The over-permissioned IAM role it
 flagged as Critical already existed, in the account, and was caught afterwards.
 
 This project is the preventive half. Checkov catches the same class of finding at
@@ -59,29 +59,29 @@ Counting findings measures scanner output. Counting root causes measures risk.
 
 ## What was fixed
 
-**RDS** — removed the hardcoded password in favour of
+**RDS** - removed the hardcoded password in favour of
 `manage_master_user_password`, so AWS generates, stores and rotates the
 credential in Secrets Manager and it never enters source control. Disabled public
 accessibility, enabled encryption at rest, backups, deletion protection, IAM
 authentication and log exports.
 
-**IAM** — replaced `Action: "*"` on `Resource: "*"` with `s3:GetObject` and
+**IAM** - replaced `Action: "*"` on `Resource: "*"` with `s3:GetObject` and
 `s3:ListBucket` scoped to one bucket ARN and its object ARN. Renamed the resource
 from `app_admin` to `app_read_data`; a name that overstates its scope is a
 future incident.
 
-**Security groups** — removed the SSH ingress rule entirely rather than narrowing
+**Security groups** - removed the SSH ingress rule entirely rather than narrowing
 it, and attached `AmazonSSMManagedInstanceCore` so administration happens through
 Session Manager. No port 22 to scan, no keys to rotate, IAM-controlled and
 CloudTrail-logged. Egress restricted from all traffic to 443 only.
 
-**EC2** — required IMDSv2 (`http_tokens = "required"`), encrypted the root
+**EC2** - required IMDSv2 (`http_tokens = "required"`), encrypted the root
 volume, moved the instance to a private subnet, attached an instance profile.
 
-**S3** — enabled all four public access block settings, KMS encryption with
+**S3** - enabled all four public access block settings, KMS encryption with
 bucket keys, versioning and access logging.
 
-**VPC** — emptied the default security group, enabled flow logs.
+**VPC** - emptied the default security group, enabled flow logs.
 
 ---
 
@@ -89,9 +89,9 @@ bucket keys, versioning and access logging.
 
 Three findings, reported as unrelated rows in a flat list of 44:
 
-- `CKV_AWS_79` — IMDSv1 enabled (rated medium)
-- `CKV_AWS_63` — IAM wildcard action (one of nine on the same line)
-- `CKV_AWS_130` — subnet assigns public IPs
+- `CKV_AWS_79` - IMDSv1 enabled (rated medium)
+- `CKV_AWS_63` - IAM wildcard action (one of nine on the same line)
+- `CKV_AWS_130` - subnet assigns public IPs
 
 Chained: an SSRF bug in the web application lets an attacker force a request to
 `169.254.169.254/latest/meta-data/iam/security-credentials/app-role`. IMDSv1
@@ -114,13 +114,13 @@ resources.**
 
 ## Where the scanner was wrong
 
-**False negative — `CKV_AWS_88` passed.** "EC2 instance should not have public
+**False negative - `CKV_AWS_88` passed.** "EC2 instance should not have public
 IP" passed while the instance sat in a subnet with
 `map_public_ip_on_launch = true`. Checkov checked the instance resource for
 `associate_public_ip_address`, found nothing, and passed — it did not follow the
 reference into the subnet.
 
-**Missed entirely — the hardcoded RDS password.** The secrets framework ran and
+**Missed entirely - the hardcoded RDS password.** The secrets framework ran and
 reported nothing. Secret scanners match on high Shannon entropy and known formats
 (`AKIA…`, `ghp_…`, PEM headers). `Password123!` is low-entropy, human-readable
 English matching no known pattern. **A weak password evades secret scanners
@@ -182,7 +182,7 @@ Checkov 3.3.11 · Terraform · AWS provider ~> 5.0
 - [x] Baseline scan and triage
 - [x] Remediation to zero findings
 - [x] Justified suppressions
-- [ ] Trivy — dependency, secret and container image scanning
+- [ ] Trivy - dependency, secret and container image scanning
 - [ ] GitHub Actions pipeline integration
 - [ ] Gate policy: which checks block a merge, which only warn
 - [ ] Kyverno admission policies (separate track, requires a cluster)
